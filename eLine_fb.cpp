@@ -81,6 +81,49 @@ uint32_t eLineFb::getResY(void)
     return fb_var.yres;
 }
 
+/**
+ * Fill a point on framebuffer. 
+ * 
+ * @param x - X Position
+ * @param y - Y Position
+ * @param color - bit[31:24]:reserved, bit[23:16]:red, bit[15:8]:green, bit[7:0]:blue. 
+ */
+void eLineFb::draw(int32_t x, int32_t y, uint32_t color)
+{
+    if (x < 0 || y < 0 || x >= fb_var.xres || y >= fb_var.yres)
+    {
+        eLineErr("Invalid parameters!");
+        return;
+    }
+#if 1 /* Invert coordinate */
+    x = fb_var.xres - 1 - x;
+    y = fb_var.yres - 1 - y;
+#endif
+
+#if 0
+    uint32_t c = 0;
+    uint32_t r = 0;
+    uint32_t g = 0;
+    uint32_t b = 0;
+    
+    r = (color >> 16) & 0xFF;
+    g = (color >>  8) & 0xFF;
+    b = (color >>  0) & 0xFF;
+    
+    r >>= (fb_var.red.length < 8) ? 8 - fb_var.red.length : 0;
+    g >>= (fb_var.green.length < 8) ? 8 - fb_var.green.length : 0;
+    b >>= (fb_var.blue.length < 8) ? 8 - fb_var.blue.length : 0;
+
+    c = r << fb_var.red.offset;
+    c |= g << fb_var.green.offset;
+    c |= b << fb_var.blue.offset;
+        
+    *((uint32_t *)fb_start + y * fb_var.xres + x) = c;
+#else
+    *((uint32_t *)fb_start + y * fb_var.xres + x) = color;
+#endif
+}
+
 void eLineFb::showInfo(void)
 {
     printFbVarScreenInfo(&fb_var);

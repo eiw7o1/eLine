@@ -20,6 +20,12 @@
  */
 class eLineFb
 {
+public: /* public datatype */
+
+    enum eLineFbFormat
+    {
+        FB_FMT_32_
+    };
 public: /* public methods */
     eLineFb(const char *fb_name);
     
@@ -28,11 +34,8 @@ public: /* public methods */
     void showInfo(void);
     uint32_t getResX(void);
     uint32_t getResY(void);
-#if 0    
-    int32_t getFormat(void); /* return: 565/556/655 */
     
-    void draw(int32_t x, int32_t y, uint32_t color, int32_t transparency = 0);
-#endif    
+    void draw(int32_t x, int32_t y, uint32_t color);
     
 
 private: /* private methods */

@@ -9,7 +9,7 @@
  * 0: Disable debug
  * n: Enable debug with level n (n>0 && n<=5). The bigger, the more information output. 
  */
-#define ELINE_DEBUG_LEVEL   (5)
+#define ELINE_DEBUG_LEVEL   (3)
 
 #define eLineDbg1(fmt, args...)\
     do {\
