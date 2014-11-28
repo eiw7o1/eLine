@@ -86,7 +86,7 @@ uint32_t eLineFb::getResY(void)
  * 
  * @param x - X Position
  * @param y - Y Position
- * @param color - bit[31:24]:reserved, bit[23:16]:red, bit[15:8]:green, bit[7:0]:blue. 
+ * @param color - bit[31:29]:reserved, bit[28:24]:alpha, bit[23:16]:red, bit[15:8]:green, bit[7:0]:blue. 
  */
 void eLineFb::draw(int32_t x, int32_t y, uint32_t color)
 {
@@ -120,7 +120,29 @@ void eLineFb::draw(int32_t x, int32_t y, uint32_t color)
         
     *((uint32_t *)fb_start + y * fb_var.xres + x) = c;
 #else
-    *((uint32_t *)fb_start + y * fb_var.xres + x) = color;
+
+    uint32_t *p = (uint32_t *)fb_start + y * fb_var.xres + x;
+    uint32_t old = *p;
+    uint32_t old_r = (old >> 16) & 0xFF;
+    uint32_t old_g = (old >>  8) & 0xFF;
+    uint32_t old_b = (old >>  0) & 0xFF;
+
+    uint32_t a = (color >> 24) & 0x1F;
+    
+    uint32_t r = (color >> 16) & 0xFF;
+    uint32_t g = (color >>  8) & 0xFF;
+    uint32_t b = (color >>  0) & 0xFF;
+    
+
+    uint32_t now_r = ((32 - a) * r + a * old_r) >> 5;
+    uint32_t now_g = ((32 - a) * g + a * old_g) >> 5;
+    uint32_t now_b = ((32 - a) * b + a * old_b) >> 5;
+
+    uint32_t now = 0;
+    
+    now = (now_r << 16) | (now_g << 8) | (now_b << 0);
+    *p = now;
+    
 #endif
 }
 
