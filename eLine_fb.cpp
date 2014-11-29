@@ -81,12 +81,26 @@ uint32_t eLineFb::getResY(void)
     return fb_var.yres;
 }
 
+void eLineFb::clear(uint32_t color)
+{
+    int32_t row;
+    int32_t col;
+    uint32_t *p = (uint32_t *)fb_start;
+    for (row = 0; row < fb_var.yres; row++)
+    {
+        for (col = 0; col < fb_var.xres; col++)
+        {
+            *(p + row * fb_var.xres + col) = color;
+        }
+    }
+}
+
 /**
  * Fill a point on framebuffer. 
  * 
  * @param x - X Position
  * @param y - Y Position
- * @param color - bit[31:29]:reserved, bit[28:24]:alpha, bit[23:16]:red, bit[15:8]:green, bit[7:0]:blue. 
+ * @param color - bit[31:24]:alpha, bit[23:16]:red, bit[15:8]:green, bit[7:0]:blue. 
  */
 void eLineFb::draw(int32_t x, int32_t y, uint32_t color)
 {
@@ -95,31 +109,11 @@ void eLineFb::draw(int32_t x, int32_t y, uint32_t color)
         eLineErr("Invalid parameters!");
         return;
     }
+    
 #if 1 /* Invert coordinate */
     x = fb_var.xres - 1 - x;
     y = fb_var.yres - 1 - y;
 #endif
-
-#if 0
-    uint32_t c = 0;
-    uint32_t r = 0;
-    uint32_t g = 0;
-    uint32_t b = 0;
-    
-    r = (color >> 16) & 0xFF;
-    g = (color >>  8) & 0xFF;
-    b = (color >>  0) & 0xFF;
-    
-    r >>= (fb_var.red.length < 8) ? 8 - fb_var.red.length : 0;
-    g >>= (fb_var.green.length < 8) ? 8 - fb_var.green.length : 0;
-    b >>= (fb_var.blue.length < 8) ? 8 - fb_var.blue.length : 0;
-
-    c = r << fb_var.red.offset;
-    c |= g << fb_var.green.offset;
-    c |= b << fb_var.blue.offset;
-        
-    *((uint32_t *)fb_start + y * fb_var.xres + x) = c;
-#else
 
     uint32_t *p = (uint32_t *)fb_start + y * fb_var.xres + x;
     uint32_t old = *p;
@@ -127,23 +121,38 @@ void eLineFb::draw(int32_t x, int32_t y, uint32_t color)
     uint32_t old_g = (old >>  8) & 0xFF;
     uint32_t old_b = (old >>  0) & 0xFF;
 
-    uint32_t a = (color >> 24) & 0x1F;
+    uint32_t a = (color >> 24) & 0xFF;
     
     uint32_t r = (color >> 16) & 0xFF;
     uint32_t g = (color >>  8) & 0xFF;
     uint32_t b = (color >>  0) & 0xFF;
     
-
-    uint32_t now_r = ((32 - a) * r + a * old_r) >> 5;
-    uint32_t now_g = ((32 - a) * g + a * old_g) >> 5;
-    uint32_t now_b = ((32 - a) * b + a * old_b) >> 5;
-
-    uint32_t now = 0;
+    uint32_t now_r = ((256 - a) * r + a * old_r) >> 8;
+    uint32_t now_g = ((256 - a) * g + a * old_g) >> 8;
+    uint32_t now_b = ((256 - a) * b + a * old_b) >> 8;
     
-    now = (now_r << 16) | (now_g << 8) | (now_b << 0);
-    *p = now;
+    *p = (now_r << 16) | (now_g << 8) | (now_b << 0);
     
-#endif
+}
+
+void eLineFb::drawSolidRect(int32_t x, int32_t w, int32_t y, int32_t h, 
+    uint32_t color)
+{
+    int32_t row = y;
+    int32_t col = x;
+    
+    int32_t row_min = y;
+    int32_t col_min = x;
+    int32_t row_max = y + h - 1;
+    int32_t col_max = x + w - 1;
+
+    for (row = row_min; row <= row_max; row++)
+    {
+        for (col = col_min; col <= col_max; col++)
+        {
+            draw(col, row, color);
+        }
+    }
 }
 
 void eLineFb::showInfo(void)

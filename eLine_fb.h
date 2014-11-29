@@ -34,9 +34,10 @@ public: /* public methods */
     void showInfo(void);
     uint32_t getResX(void);
     uint32_t getResY(void);
-    
+
+    void clear(uint32_t color = 0);
     void draw(int32_t x, int32_t y, uint32_t color);
-    
+    void drawSolidRect(int32_t x, int32_t w, int32_t y, int32_t h, uint32_t color);
 
 private: /* private methods */
     void printFbBitfield(struct fb_bitfield *bf);
