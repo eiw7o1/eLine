@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 #endif
 
     lcd.clear(ARGB_BLUE);
-    lcd.drawSolidRect(0, lcd_xmax/2, 0, lcd_ymax/2, ARGB_RED | (0xD0 << 24));
+    lcd.drawSolidRect(0, lcd_xmax/2, 0, lcd_ymax/2, ARGB_PURPLE | (150U << 24));
     //lcd.drawSolidRect(lcd_xmax/2, lcd_xmax/2, lcd_ymax/2, lcd_ymax/2, ARGB_BLUE);
 
     lcd.exit();
